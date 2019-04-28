@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">TobiiStream</string>
+    <string name="description">TobiiStream is an app designed to allow full functionality of the Tobii Pro Glasses 2 in a research environment without requiring a desktop environment.\nPlease ensure you are connected to the same network as the glasses before selecting \'Connect\'.</string>
+    <string name="connect_button">Connect</string>
+    <string name="action_settings">Settings</string>
+    <string name="new_study">New Study</string>
+    <string name="existing_study">Existing Study</string>
+    <string name="new_participant">New Participant</string>
+    <string name="existing_participant">Existing Participant</string>
+    <string name="calibrate">Calibrate</string>
+    <string name="record">Record</string>
+    <string name="new_study_default">Study Name</string>
+    <string name="new_participant_default">Participant Name</string>
+    <string name="confirm_button">Confirm</string>
+    <string name="empty_string"></string>
+    <string name="pick_a_study">Are you continuing an existing study or starting a new one?</string>
+    <string name="pick_existing_study">Please select a study to continue.</string>
+    <string name="pick_new_study">Please enter the name of the new study</string>
+    <string name="pick_a_participant">Has the participant used these glasses before?</string>
+    <string name="pick_existing_participant">Please select the participant from the list.</string>
+    <string name="pick_new_participant">Please enter the participant\'s name</string>
+    <string-array name="participants_test">
+        <item>Joe Bloggs</item>
+    </string-array>
+    <string-array name="studies_test">
+        <item>Study 1</item>
+    </string-array>
+</resources>
