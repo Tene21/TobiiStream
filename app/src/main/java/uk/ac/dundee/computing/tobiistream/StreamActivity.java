@@ -57,15 +57,16 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     public JSONArray participantsJSON;
     public JSONArray studiesJSON;
     public String statusJSON;
+    public String selectedStudyId;
 
     /*
     String[] participants;
     String[] participantUris;
     String[] studies;
-    String[] studyUri;
+    String[] studyId;
     */
     ArrayList<String> studies = new ArrayList<>();
-    ArrayList<String> studyUri = new ArrayList<>();
+    ArrayList<String> studyId = new ArrayList<>();
     ArrayList<String> participants = new ArrayList<>();
     ArrayList<String> participantUris = new ArrayList<>();
     ArrayList<String> participantStudy = new ArrayList<>();
@@ -251,18 +252,22 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         EditText newStudyName = findViewById(R.id.studyName);
         Spinner oldStudyName = findViewById(R.id.oldStudyName);
         Button studyNameConfirm = findViewById(R.id.confirmStudyName);
-        if(newStudyName.getText().toString().isEmpty() && oldStudyName.getSelectedItem().toString().isEmpty()){
+        if(newStudyName.getText().toString().isEmpty() && oldStudyName.getVisibility() == View.INVISIBLE){
+            //New study selected, but confirmed with box empty
             System.out.println("No input provided");
         }
         else if(!newStudyName.getText().toString().isEmpty() && oldStudyName.getVisibility() == View.INVISIBLE)
         {
+            //New study name provided
             TextView pickNewStudy = findViewById(R.id.pickNewStudy);
             pickNewStudy.setVisibility(View.INVISIBLE);
             studyName = newStudyName.getText().toString();
             System.out.println("study name: " + studyName);
             newStudyName.setVisibility(View.INVISIBLE);
             studyNameConfirm.setVisibility(View.INVISIBLE);
-            String content = "{\"pr_info\":{\"name\":\"" + studyName + "\",\"xid\":\"" + /*xid goes here, whatever that is */"\"";
+            String content = "{\"pr_info\":{\"name\":\"" + studyName + "\"";
+            //new HttpPost().execute("http://192.168.71.50/api/projects",content);
+            //will return JSON via a keep-alive message, parse for pr_id to get the id of the new project.
             //showParticipantButtons();
             //new study means new participants, skip straight to new participant.
             newParticipant(view);
@@ -276,6 +281,12 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
             System.out.println("study name: " + studyName);
             oldStudyName.setVisibility(View.INVISIBLE);
             studyNameConfirm.setVisibility(View.INVISIBLE);
+            selectedStudyId = studyId.get(oldStudyName.getSelectedItemPosition());
+            /*
+            **new HttpPut().execute("http://192.168.71.50/api/projects/" + selectedStudyId");
+            **we don't actually need to do anything with this right now. if the user chooses to use an existing participant,
+            **we can GET request http://192.168.71.50/api/projects/SelectedStudyId/participants to get a filtered participant list
+            */
             showParticipantButtons();
         }
         else{
@@ -349,18 +360,19 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
             org.json.simple.JSONObject studiesObject = (JSONObject) studiesArray.get(i);
             //study name is in another JSON object named "pr_info"
             org.json.simple.JSONObject studiesInfo = null;
+            String studiesId = null;
             try {
                 studiesInfo = (org.json.simple.JSONObject) parser.parse(studiesObject.get("pr_info").toString());
+                studiesId = (String) parser.parse(studiesObject.get("pr_id").toString());
             } catch (ParseException e) {
                 e.printStackTrace();
             }
             String studyName = studiesInfo.get("Name").toString();
             System.out.println("Study name #" + i + ": " + studyName);
-            String studiesUri = studiesObject.get("uri").toString();
-            //push name and URI to a two-dimensional array? can't think of any other way to keep them associated.
+            //push name and ID to a two-dimensional array? can't think of any other way to keep them associated.
             //or just have them in two separate arrays, kept symmetrical? so entry 1 in the name array corresponds to entry 1 in the URI array?
             studies.add(studyName);
-            studyUri.add(studiesUri);
+            studyId.add(studiesId);
 
         }
         Spinner studySpinner = findViewById(R.id.oldStudyName);
