@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
                             .setTitle("Glasses not detected")
                             .setMessage("Could not locate glasses on local network. Please check connection and try again.")
                             //.setPositiveButton(android.R.string.yes, null)
+                            //adding a proceed statement to allow testing
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
