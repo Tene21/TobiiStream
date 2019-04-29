@@ -76,8 +76,6 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     ArrayList<String> participantStudy = new ArrayList<>();
 
     JSONParser parser = new JSONParser();
-    private UDPServer Server;
-    private UDPClient Client;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
