@@ -68,7 +68,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     ArrayList<String> studies = new ArrayList<>();
     ArrayList<String> studyId = new ArrayList<>();
     ArrayList<String> participants = new ArrayList<>();
-    ArrayList<String> participantUris = new ArrayList<>();
+    ArrayList<String> participantIds = new ArrayList<>();
     ArrayList<String> participantStudy = new ArrayList<>();
 
     JSONParser parser = new JSONParser();
@@ -207,10 +207,12 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         //pull list of participants from glasses, parse as List, create ArrayAdapter from the list and set the adapter on the spinner
         hideParticipantButtons();
         Spinner oldParticipant = findViewById(R.id.oldParticipantName);
+
         TextView pickOldParticipant = findViewById(R.id.pickExistingParticipant);
         pickOldParticipant.setVisibility(View.VISIBLE);
         oldParticipant.setVisibility(View.VISIBLE);
         showParticipantConfirm();
+        getParticipants();
 
     }
     public void showParticipantConfirm(){
@@ -281,6 +283,8 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
             System.out.println("study name: " + studyName);
             oldStudyName.setVisibility(View.INVISIBLE);
             studyNameConfirm.setVisibility(View.INVISIBLE);
+            System.out.println("Selected option " + oldStudyName.getSelectedItem() + " at " + oldStudyName.getSelectedItemPosition());
+            System.out.println("studyId contents: " + studyId);
             selectedStudyId = studyId.get(oldStudyName.getSelectedItemPosition());
             /*
             **new HttpPut().execute("http://192.168.71.50/api/projects/" + selectedStudyId");
@@ -363,12 +367,15 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
             String studiesId = null;
             try {
                 studiesInfo = (org.json.simple.JSONObject) parser.parse(studiesObject.get("pr_info").toString());
-                studiesId = (String) parser.parse(studiesObject.get("pr_id").toString());
+                System.out.println("studiesInfo: " + studiesInfo);
+                studiesId = studiesObject.get("pr_id").toString();
+                System.out.println("studiesId: "+ studiesId);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
             String studyName = studiesInfo.get("Name").toString();
             System.out.println("Study name #" + i + ": " + studyName);
+            System.out.println("Study ID: " + studiesId);
             //push name and ID to a two-dimensional array? can't think of any other way to keep them associated.
             //or just have them in two separate arrays, kept symmetrical? so entry 1 in the name array corresponds to entry 1 in the URI array?
             studies.add(studyName);
@@ -376,14 +383,15 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
 
         }
         Spinner studySpinner = findViewById(R.id.oldStudyName);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,studies);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,studies);
         studySpinner.setAdapter(adapter);
 
     }
 
     public void getParticipants() {
         try {
-            participantsJSON = (JSONArray) parser.parse(new HttpGet().execute("http://192.168.71.50/api/participants").get());
+            System.out.println("Selected study ID: " + selectedStudyId);
+            participantsJSON = (JSONArray) parser.parse(new HttpGet().execute("http://192.168.71.50/api/projects/"+selectedStudyId+"/participants").get());
         } catch (ParseException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -402,11 +410,19 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
                 e.printStackTrace();
             }
             System.out.println("Participant info: " + participantInfo);
-            String participantUri = participantObject.get("uri").toString();
-            String participantProject = participantObject.get("pa_project").toString();
+            String participantName = participantInfo.get("Name").toString();
+            String participantUri = participantObject.get("pa_id").toString();
+            //String participantProject = participantObject.get("pa_project").toString();
+
+            participants.add(participantName);
+            participantIds.add(participantUri);
 
 
         }
+        System.out.println("Participant array: " + participants);
+        Spinner participantSpinner = findViewById(R.id.oldParticipantName);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,participants);
+        participantSpinner.setAdapter(adapter);
     }
     public void getStatus(){
         timer.scheduleAtFixedRate(new TimerTask() {
