@@ -127,6 +127,14 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         mMediaPlayer.setMedia(m);
         mMediaPlayer.play();
         getStatus();
+        try {
+            String gazeJSON = new GazeData().execute("").get();
+            System.out.println(gazeJSON);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
