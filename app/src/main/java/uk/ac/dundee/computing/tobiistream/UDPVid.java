@@ -12,11 +12,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class UDPVid extends AsyncTask<String, Void, String> {
-    int timeout = 3;
+public class UDPVid extends AsyncTask<String, Void, DatagramSocket> {
+    int timeout = 5;
     static boolean running = true;
     static Timer timer  = new Timer();
-    static int port = 49153;
+    static int port = 49155;
     static DatagramSocket dataSocket;
     static byte[] buffer = new byte[1000];
     static String dataKeepAliveMessage = "{\"type\": \"live.video.unicast\", \"key\": \"some_other_GUID\", \"op\": \"start\"}";
@@ -24,7 +24,7 @@ public class UDPVid extends AsyncTask<String, Void, String> {
 
 
 
-    protected String doInBackground(String... target) {
+    protected DatagramSocket doInBackground(String... target) {
         if(target.equals("stop"))
         {
             stopSending();
@@ -45,10 +45,8 @@ public class UDPVid extends AsyncTask<String, Void, String> {
             DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
             String response;
             dataSocket.receive(receivedPacket);
-            response = receivedPacket.toString();
             while(running) {
-                System.out.println("Gaze: " + response);
-                return response;
+                return dataSocket;
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -62,7 +60,7 @@ public class UDPVid extends AsyncTask<String, Void, String> {
 
         return null;
     }
-    protected void onPostExecute(String result){
+    protected void onPostExecute(DatagramSocket result){
         super.onPostExecute(result);
     }
 

@@ -1,6 +1,7 @@
 package uk.ac.dundee.computing.tobiistream;
 
 import android.app.Activity;
+import android.net.IpSecManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -26,10 +27,18 @@ import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.net.DatagramSocket;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.Timer;
+import java.util.zip.GZIPInputStream;
 
 public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     public final static String TAG = "StreamActivity";
@@ -68,7 +77,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         setContentView(R.layout.activity_stream);
 
 
-        //big buck bunny test rtspUrl = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
+        //rtspUrl = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
         rtspUrl = "rtsp://192.168.71.50:8554/live/scene";
         Log.d(TAG, "Playing " + rtspUrl);
 
@@ -80,6 +89,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         options.add("--aout=opensles");
         options.add("--audio-time-stretch"); // time stretching
         options.add("-vvv"); // verbosity
+        options.add("--sout=\"scale=0.67\"");
         options.add("--aout=opensles");
         options.add("--avcodec-codec=h264");
         options.add("--file-logging");
@@ -92,7 +102,6 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         // Create media player
         mMediaPlayer = new MediaPlayer(libvlc);
         mMediaPlayer.setEventListener(mPlayerListener);
-        //mMediaPlayer.getVLCVout().setWindowSize(-Math.abs(mSurface.getWidth()),-Math.abs(mSurface.getHeight()));
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -107,14 +116,17 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         vout.addCallback(this);
         vout.attachViews();
 
-        Media m = new Media(libvlc, Uri.parse(rtspUrl));
 
-        mMediaPlayer.setMedia(m);
-        mMediaPlayer.play();
-        getStatus();
+
+
         try {
-            String gazeJSON = new GazeData().execute("").get();
-            String UDPStream = new UDPVid().execute("").get();
+            Serializable gazeJSON = new GazeData().execute("").get();
+            //decompressor(gazeJSON);
+            System.out.println("Gaze: " + gazeJSON);
+            Media m = new Media(libvlc, Uri.parse(rtspUrl));
+            mMediaPlayer.setMedia(m);
+            mMediaPlayer.play();
+            getStatus();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -122,13 +134,31 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         }
 
     }
-
+/*    public String decompressor(Serializable compressed){
+        String decompressed;
+        FileInputStream fis = null;
+        GZIPInputStream gis = null;
+        ObjectInputStream ois = null;
+        try {
+            fis = new FileInputStream((File) compressed);
+            gis = new GZIPInputStream(fis);
+            ois = new ObjectInputStream(gis);
+            decompressed = (String)ois.readObject();
+            System.out.println("Decompressed: " + decompressed);
+            return decompressed;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }*/
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        // createPlayer(mFilePath);
+
     }
 
     @Override
@@ -142,7 +172,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         super.onDestroy();
         releasePlayer();
         new GazeData().execute("stop");
-        new UDPVid().execute("stop");
+        //new UDPVid().execute("stop");
     }
 
     @Override
