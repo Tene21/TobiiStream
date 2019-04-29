@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import org.json.simple.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.videolan.libvlc.IVLCVout;
@@ -316,64 +316,62 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     }
 
     public void getStudies(){
+
         try {
             studiesJSON = (JSONArray)parser.parse(new HttpGet().execute("http://192.168.71.50/api/projects").get());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-            System.out.println("Studies JSON: " +studiesJSON);
+        System.out.println("Studies JSON: " +studiesJSON);
+
+        JSONArray studiesArray = studiesJSON;
+        for (int i = 0; i < studiesArray.size(); i++){
+            org.json.simple.JSONObject studiesObject = (JSONObject) studiesArray.get(i);
+            //study name is in another JSON object named "pr_info"
+            org.json.simple.JSONObject studiesInfo = null;
             try {
-                JSONArray studiesArray = studiesJSON;
-                for (int i = 0; i < studiesArray.size(); i++){
-                    JSONObject studiesObject = null;
-                    //study name is in another JSON object named "pr_info"
-                    JSONObject studiesInfo = (JSONObject) parser.parse(studiesObject.getString("pr_info"));
-                    String studyName = studiesInfo.getString("Name");
-                    String studiesUri = studiesObject.getString("uri");
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+                studiesInfo = (org.json.simple.JSONObject) parser.parse(studiesObject.get("pr_info").toString());
             } catch (ParseException e) {
                 e.printStackTrace();
             }
+            String studyName = studiesInfo.get("Name").toString();
+            System.out.println("Study name #" + i + ": " + studyName);
+            String studiesUri = studiesObject.get("uri").toString();
+        }
+    }
 
+    public void getParticipants() {
+        try {
+            participantsJSON = (JSONArray) parser.parse(new HttpGet().execute("http://192.168.71.50/api/participants").get());
+        } catch (ParseException e) {
+            e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
         }
-
-
-    }
-
-    public void getParticipants(){
-        try {
-            participantsJSON = (JSONArray)parser.parse(new HttpGet().execute("http://192.168.71.50/api/participants").get());
+        JSONArray participantArray = participantsJSON;
+        for (int i = 0; i < participantArray.size(); i++) {
+            org.json.simple.JSONObject participantObject = (org.json.simple.JSONObject) participantArray.get(i);
+            //participant name is in another JSON object named "pa_info"
+            JSONObject participantInfo = null;
             try {
-                JSONArray participantArray = participantsJSON;
-                for (int i = 0; i < participantArray.size(); i++){
-                    JSONObject participantObject = null;
-                    //participant name is in another JSON object named "pa_info"
-                    String participantInfo = participantObject.getString("pa_info");
-                    System.out.println("Participant info: " + participantInfo);
-                    String participantUri = participantObject.getString("uri");
-                    String participantProject = participantObject.getString("pa_project");
-
-                }
-            } catch (JSONException e) {
+                participantInfo = (JSONObject) parser.parse(participantObject.get("pa_info").toString());
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+            System.out.println("Participant info: " + participantInfo);
+            String participantUri = participantObject.get("uri").toString();
+            String participantProject = participantObject.get("pa_project").toString();
+
+
         }
-
-
     }
-
     public void getStatus(){
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
