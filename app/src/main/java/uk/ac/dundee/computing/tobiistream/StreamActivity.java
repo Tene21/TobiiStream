@@ -254,7 +254,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         if(newStudyName.getText().toString().isEmpty() && oldStudyName.getSelectedItem().toString().isEmpty()){
             System.out.println("No input provided");
         }
-        else if(!newStudyName.getText().toString().isEmpty())
+        else if(!newStudyName.getText().toString().isEmpty() && oldStudyName.getVisibility() == View.INVISIBLE)
         {
             TextView pickNewStudy = findViewById(R.id.pickNewStudy);
             pickNewStudy.setVisibility(View.INVISIBLE);
@@ -267,8 +267,9 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
             //new study means new participants, skip straight to new participant.
             newParticipant(view);
         }
-        else if (!oldStudyName.getSelectedItem().toString().isEmpty())
+        else if (!oldStudyName.getSelectedItem().toString().isEmpty() && newStudyName.getVisibility() == View.INVISIBLE)
         {
+            //this input validation is terrible, leaving the new study box empty will autoselect topmost spinner value. need to verify that we're only taking input from the spinner when we actually want to.
             TextView pickOldStudy = findViewById(R.id.pickExistingStudy);
             pickOldStudy.setVisibility(View.INVISIBLE);
             studyName = oldStudyName.getSelectedItem().toString();
@@ -276,6 +277,9 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
             oldStudyName.setVisibility(View.INVISIBLE);
             studyNameConfirm.setVisibility(View.INVISIBLE);
             showParticipantButtons();
+        }
+        else{
+            System.out.println("I'm not sure how you've done it, but you selected absolutely nothing in a system where that should be impossible. Congratulations, I guess.");
         }
     }
 
