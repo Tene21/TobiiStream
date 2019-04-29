@@ -50,6 +50,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     private String rtspUrl;
     public String participantsJSON;
     public String studiesJSON;
+    public String statusJSON;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -324,5 +325,15 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
             e.printStackTrace();
         }
 
+    }
+
+    public void getStatus(){
+        try {
+            statusJSON = new HttpGet().execute("http://192.168.71.50/api/system/status").get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
