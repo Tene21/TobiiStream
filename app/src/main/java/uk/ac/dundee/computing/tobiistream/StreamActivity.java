@@ -384,10 +384,15 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
                     //get "sys_battery" as jsonobject, get "level" from there
                     String batteryStatus = (String) statusObject.get("sys_battery").toString();
                     org.json.simple.JSONObject batteryObject = (org.json.simple.JSONObject) parser.parse(batteryStatus);
-                    String batteryLevel = batteryObject.get("level").toString() + "%";
+                    final String batteryLevel = batteryObject.get("level").toString() + "%";
                     System.out.println("Battery: "+ batteryLevel);
-                    TextView batteryDisplay = findViewById(R.id.batteryValue);
-                    batteryDisplay.setText(batteryLevel);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            TextView batteryDisplay = findViewById(R.id.batteryValue);
+                            batteryDisplay.setText(batteryLevel);
+                        }
+                    });
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
