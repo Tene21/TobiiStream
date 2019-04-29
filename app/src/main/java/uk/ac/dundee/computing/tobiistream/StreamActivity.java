@@ -2,7 +2,6 @@ package uk.ac.dundee.computing.tobiistream;
 
 import android.app.Activity;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -10,7 +9,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,11 +16,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.net.rtp.RtpStream;
-
 
 import org.json.simple.JSONArray;
-import org.json.JSONException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -30,11 +25,7 @@ import org.videolan.libvlc.IVLCVout;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
-import org.w3c.dom.Text;
 
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
@@ -63,12 +54,6 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     public String statusJSON;
     public String selectedStudyId;
 
-    /*
-    String[] participants;
-    String[] participantUris;
-    String[] studies;
-    String[] studyId;
-    */
     ArrayList<String> studies = new ArrayList<>();
     ArrayList<String> studyId = new ArrayList<>();
     ArrayList<String> participants = new ArrayList<>();
@@ -129,7 +114,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         getStatus();
         try {
             String gazeJSON = new GazeData().execute("").get();
-            System.out.println(gazeJSON);
+            String UDPStream = new UDPVid().execute("").get();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -156,6 +141,8 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     protected void onDestroy() {
         super.onDestroy();
         releasePlayer();
+        new GazeData().execute("stop");
+        new UDPVid().execute("stop");
     }
 
     @Override

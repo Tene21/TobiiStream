@@ -11,14 +11,15 @@ import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class GazeData extends AsyncTask<String, Void, String> {
+
+public class UDPVid extends AsyncTask<String, Void, String> {
     int timeout = 3;
     static boolean running = true;
     static Timer timer  = new Timer();
-    static int port = 49152;
+    static int port = 49153;
     static DatagramSocket dataSocket;
     static byte[] buffer = new byte[1000];
-    static String dataKeepAliveMessage = "{\"type\": \"live.data.unicast\", \"key\": \"some_GUID\", \"op\": \"start\"}";
+    static String dataKeepAliveMessage = "{\"type\": \"live.video.unicast\", \"key\": \"some_other_GUID\", \"op\": \"start\"}";
     InetAddress glassesIP;
 
 
@@ -38,6 +39,7 @@ public class GazeData extends AsyncTask<String, Void, String> {
                 @Override
                 public void run() {
                     sendKeepAlive(dataSocket, dataKeepAliveMessage, glassesIP);
+
                 }
             },0,50);
             DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
@@ -64,7 +66,7 @@ public class GazeData extends AsyncTask<String, Void, String> {
         super.onPostExecute(result);
     }
 
-     void stopSending() {
+    void stopSending() {
         running = false;
     }
 
@@ -73,7 +75,7 @@ public class GazeData extends AsyncTask<String, Void, String> {
     void sendKeepAlive(DatagramSocket socket, String message, InetAddress IP){
         while(running){
             //System.out.println("Sending " + message + " to target " + IP);
-            //System.out.println("Sent keep-alive for data");
+            //System.out.println("Sent keep-alive for video");
             DatagramPacket sendPacket = new DatagramPacket(message.getBytes(), message.length());
             try {
                 socket.send(sendPacket);
