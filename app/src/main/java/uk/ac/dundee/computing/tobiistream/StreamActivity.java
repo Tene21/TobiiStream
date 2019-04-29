@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.net.rtp.RtpStream;
 
 
 import org.json.simple.JSONArray;
@@ -31,6 +32,9 @@ import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
 import org.w3c.dom.Text;
 
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
@@ -72,6 +76,8 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     ArrayList<String> participantStudy = new ArrayList<>();
 
     JSONParser parser = new JSONParser();
+    private UDPServer Server;
+    private UDPClient Client;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -123,6 +129,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         mMediaPlayer.setMedia(m);
         mMediaPlayer.play();
         getStatus();
+
     }
 
 
@@ -327,6 +334,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         }
     }
     public void updateGazeCoords(float xCoords, float yCoords){
+
         RelativeLayout rlMain = findViewById(R.id.videoArea);
         ImageView reticle = findViewById(R.id.gazeReticle);
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mSurface.getLayoutParams();
