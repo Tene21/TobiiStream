@@ -25,4 +25,5 @@
     <string-array name="studies_test">
         <item>Study 1</item>
     </string-array>
+    <string name="battery_level">Battery:</string>
 </resources>

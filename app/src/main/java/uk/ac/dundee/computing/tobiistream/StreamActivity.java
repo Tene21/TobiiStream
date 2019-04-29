@@ -18,18 +18,21 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 
+import org.json.simple.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.videolan.libvlc.IVLCVout;
 import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
 import org.w3c.dom.Text;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
+import java.util.Timer;
 
 public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     public final static String TAG = "StreamActivity";
@@ -44,13 +47,19 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     private LibVLC libvlc;
     private MediaPlayer mMediaPlayer = null;
 
+    Timer timer  = new Timer();
 
     private MediaPlayer.EventListener mPlayerListener = new MyPlayerListener(this);
 
     private String rtspUrl;
-    public String participantsJSON;
-    public String studiesJSON;
+    public JSONArray participantsJSON;
+    public JSONArray studiesJSON;
     public String statusJSON;
+
+    String[] participants;
+    String[] studies;
+
+    JSONParser parser = new JSONParser();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,7 +110,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
 
         mMediaPlayer.setMedia(m);
         mMediaPlayer.play();
-
+        getStatus();
     }
 
 
@@ -203,6 +212,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         oldStudy.setVisibility(View.INVISIBLE);
         newStudy.setVisibility(View.INVISIBLE);
         pickStudy.setVisibility(View.INVISIBLE);
+
     }
     public void showParticipantButtons(){
         Button oldParticipant = findViewById(R.id.oldParticipantButton);
@@ -241,6 +251,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
             System.out.println("study name: " + studyName);
             newStudyName.setVisibility(View.INVISIBLE);
             studyNameConfirm.setVisibility(View.INVISIBLE);
+            String content = "{\"pr_info\":{\"name\":\"" + studyName + "\",\"xid\":\"" + /*xid goes here, whatever that is */"\"";
             //showParticipantButtons();
             //new study means new participants, skip straight to new participant.
             newParticipant(view);
@@ -306,10 +317,29 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
 
     public void getStudies(){
         try {
-            studiesJSON = new HttpGet().execute("http://192.168.71.50/api/projects").get();
+            studiesJSON = (JSONArray)parser.parse(new HttpGet().execute("http://192.168.71.50/api/projects").get());
+
+            System.out.println("Studies JSON: " +studiesJSON);
+            try {
+                JSONArray studiesArray = studiesJSON;
+                for (int i = 0; i < studiesArray.size(); i++){
+                    JSONObject studiesObject = null;
+                    //study name is in another JSON object named "pr_info"
+                    JSONObject studiesInfo = (JSONObject) parser.parse(studiesObject.getString("pr_info"));
+                    String studyName = studiesInfo.getString("Name");
+                    String studiesUri = studiesObject.getString("uri");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
 
@@ -318,22 +348,54 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
 
     public void getParticipants(){
         try {
-            participantsJSON = new HttpGet().execute("http://192.168.71.50/api/participants").get();
+            participantsJSON = (JSONArray)parser.parse(new HttpGet().execute("http://192.168.71.50/api/participants").get());
+            try {
+                JSONArray participantArray = participantsJSON;
+                for (int i = 0; i < participantArray.size(); i++){
+                    JSONObject participantObject = null;
+                    //participant name is in another JSON object named "pa_info"
+                    String participantInfo = participantObject.getString("pa_info");
+                    System.out.println("Participant info: " + participantInfo);
+                    String participantUri = participantObject.getString("uri");
+                    String participantProject = participantObject.getString("pa_project");
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
+
 
     }
 
     public void getStatus(){
-        try {
-            statusJSON = new HttpGet().execute("http://192.168.71.50/api/system/status").get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    statusJSON = new HttpGet().execute("http://192.168.71.50/api/system/status").get();
+                    org.json.simple.JSONObject statusObject = (org.json.simple.JSONObject) parser.parse(statusJSON);
+                    //get "sys_battery" as jsonobject, get "level" from there
+                    String batteryStatus = (String) statusObject.get("sys_battery").toString();
+                    org.json.simple.JSONObject batteryObject = (org.json.simple.JSONObject) parser.parse(batteryStatus);
+                    String batteryLevel = batteryObject.get("level").toString() + "%";
+                    System.out.println("Battery: "+ batteryLevel);
+                    TextView batteryDisplay = findViewById(R.id.batteryValue);
+                    batteryDisplay.setText(batteryLevel);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            },0,1*60*1000);
     }
 }

@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "uk.ac.dundee.computing.tobiistream"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -55,5 +55,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.github.masterwok:libvlc-android-sdk:3.0.13'
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation ('com.googlecode.json-simple:json-simple:1.1.1') {exclude group: 'org.hamcrest', module: 'hamcrest-core'}
 }

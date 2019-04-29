@@ -37,7 +37,7 @@ public class HttpGet extends AsyncTask<String , Void ,String> {
             e.printStackTrace();
         }
 
-        return null;
+        return server_response;
     }
 
     @Override
