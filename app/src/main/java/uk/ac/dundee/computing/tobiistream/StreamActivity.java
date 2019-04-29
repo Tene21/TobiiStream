@@ -2,6 +2,7 @@ package uk.ac.dundee.computing.tobiistream;
 
 import android.app.Activity;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -23,7 +24,12 @@ import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
 import org.w3c.dom.Text;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     public final static String TAG = "StreamActivity";
@@ -42,6 +48,8 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     private MediaPlayer.EventListener mPlayerListener = new MyPlayerListener(this);
 
     private String rtspUrl;
+    public String participantsJSON;
+    public String studiesJSON;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -162,6 +170,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         oldStudyName.setVisibility(View.VISIBLE);
         pickOldStudy.setVisibility(View.VISIBLE);
         showStudyNameConfirm();
+        getStudies();
     }
     public void newParticipant(final View view){
         hideParticipantButtons();
@@ -180,6 +189,7 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         pickOldParticipant.setVisibility(View.VISIBLE);
         oldParticipant.setVisibility(View.VISIBLE);
         showParticipantConfirm();
+
     }
     public void showParticipantConfirm(){
         Button participantConfirm = findViewById(R.id.confirmParticipantName);
@@ -291,5 +301,28 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
         //call if/when tracking is lost
         ImageView reticle = findViewById(R.id.gazeReticle);
         reticle.setVisibility(View.INVISIBLE);
+    }
+
+    public void getStudies(){
+        try {
+            studiesJSON = new HttpGet().execute("http://192.168.71.50/api/projects").get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public void getParticipants(){
+        try {
+            participantsJSON = new HttpGet().execute("http://192.168.71.50/api/participants").get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }
