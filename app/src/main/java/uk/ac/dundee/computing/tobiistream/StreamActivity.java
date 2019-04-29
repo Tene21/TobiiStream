@@ -10,6 +10,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -56,8 +58,17 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
     public JSONArray studiesJSON;
     public String statusJSON;
 
+    /*
     String[] participants;
+    String[] participantUris;
     String[] studies;
+    String[] studyUri;
+    */
+    ArrayList<String> studies = new ArrayList<>();
+    ArrayList<String> studyUri = new ArrayList<>();
+    ArrayList<String> participants = new ArrayList<>();
+    ArrayList<String> participantUris = new ArrayList<>();
+    ArrayList<String> participantStudy = new ArrayList<>();
 
     JSONParser parser = new JSONParser();
 
@@ -342,7 +353,16 @@ public class StreamActivity  extends Activity implements IVLCVout.Callback    {
             String studyName = studiesInfo.get("Name").toString();
             System.out.println("Study name #" + i + ": " + studyName);
             String studiesUri = studiesObject.get("uri").toString();
+            //push name and URI to a two-dimensional array? can't think of any other way to keep them associated.
+            //or just have them in two separate arrays, kept symmetrical? so entry 1 in the name array corresponds to entry 1 in the URI array?
+            studies.add(studyName);
+            studyUri.add(studiesUri);
+
         }
+        Spinner studySpinner = findViewById(R.id.oldStudyName);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,studies);
+        studySpinner.setAdapter(adapter);
+
     }
 
     public void getParticipants() {
